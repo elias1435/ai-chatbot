@@ -1,3 +1,99 @@
+<?php
+/*This file is part of ColorMagChild, colormag child theme.
+
+All functions of this file will be loaded before of parent theme functions.
+Learn more at https://codex.wordpress.org/Child_Themes.
+
+Note: this function loads the parent stylesheet before, then child theme stylesheet
+(leave it in place unless you know what you are doing.)
+*/
+
+if ( ! function_exists( 'suffice_child_enqueue_child_styles' ) ) {
+	function ColorMagChild_enqueue_child_styles() {
+	    // loading parent style
+	    wp_register_style(
+	      'parente2-style',
+	      get_template_directory_uri() . '/style.css'
+	    );
+
+	    wp_enqueue_style( 'parente2-style' );
+	    // loading child style
+	    wp_register_style(
+	      'childe2-style',
+	      get_stylesheet_directory_uri() . '/style.css'
+	    );
+	    wp_enqueue_style( 'childe2-style');
+	 }
+}
+add_action( 'wp_enqueue_scripts', 'ColorMagChild_enqueue_child_styles' );
+
+
+// add script in footer
+add_action('wp_footer', 'md_add_script_wp_footer');
+function md_add_script_wp_footer() {
+?>
+<script>
+	jQuery( document ).ready(function() {
+    jQuery(".sabai-alert.sabai-alert-success p").text('Your Business has been submitted successfully and published. You can view the Business'));
+});
+</script>
+
+<?php
+}
+
+add_action('wp_head', 'your_function_name');
+function your_function_name(){
+?>
+<script type="text/javascript" src="https://booking.resdiary.com/bundles/WidgetV2Loader.js"></script>
+
+<?php
+};
+
+
+
+
+function add_shortcodes_inside_cm_entry_summary() {
+    if (is_single()) {
+        // First shortcode
+        $shortcode_output_one = '<div class="single-ads-banner" style="margin-bottom: 20px;">' . do_shortcode('[smartslider3 slider="26"]') . '</div>';
+        // Second shortcode
+        $shortcode_output_two = '<div class="single-ads-banner" style="margin-bottom: 20px;">' . do_shortcode('[smartslider3 slider="27"]') . '</div>';
+
+        // Inline JavaScript to insert the shortcodes in desired positions
+        $script = "
+            document.addEventListener('DOMContentLoaded', function() {
+                var entrySummaryDiv = document.querySelector('.cm-entry-summary');
+                if (entrySummaryDiv) {
+                    // Insert after the last <p> tag
+                    var lastParagraph = entrySummaryDiv.querySelector('p:last-of-type');
+                    if (lastParagraph) {
+                        var wrapperOne = document.createElement('div');
+                        wrapperOne.innerHTML = `" . addslashes($shortcode_output_one) . "`;
+                        lastParagraph.parentNode.insertBefore(wrapperOne.firstChild, lastParagraph.nextSibling);
+                    }
+
+                    // Insert after the third <p> tag
+                    var paragraphs = entrySummaryDiv.querySelectorAll('p');
+                    if (paragraphs.length >= 3) {
+                        var thirdParagraph = paragraphs[2]; // Third <p> (index starts at 0)
+                        var wrapperTwo = document.createElement('div');
+                        wrapperTwo.innerHTML = `" . addslashes($shortcode_output_two) . "`;
+                        thirdParagraph.parentNode.insertBefore(wrapperTwo.firstChild, thirdParagraph.nextSibling);
+                    }
+                }
+            });
+        ";
+
+        // Add the inline script
+        wp_add_inline_script('jquery', $script);
+    }
+}
+add_action('wp_enqueue_scripts', 'add_shortcodes_inside_cm_entry_summary');
+
+
+
+
+/* Simple Chatbot */
 function enqueue_chatbot_script() {
     $version = filemtime(get_stylesheet_directory() . '/js/chatbot.js'); // Cache busting
 
@@ -18,7 +114,7 @@ function enqueue_chatbot_script() {
 add_action('wp_enqueue_scripts', 'enqueue_chatbot_script');
 
 
-// search in post/page
+// Search in post/page/directory
 function chatbot_search_query() {
     if (!isset($_POST['message'])) {
         wp_send_json_error(['response' => 'Invalid request']);
@@ -30,9 +126,12 @@ function chatbot_search_query() {
     // Extract important keywords from the user input
     $search_query = chatbot_extract_keywords($search_query);
 
+    // Debugging: Log the final search query
+    error_log('Chatbot Final Search Query: ' . $search_query);
+
     // Search WordPress posts and pages
     $args = array(
-        'post_type'      => array('post', 'page'),
+        'post_type'      => array('post', 'directory', 'page'),
         'posts_per_page' => 5,
         's'              => $search_query
     );
@@ -59,10 +158,14 @@ function chatbot_search_query() {
 function chatbot_extract_keywords($text) {
     // Convert to lowercase and remove special characters
     $text = strtolower($text);
-    $text = preg_replace('/[^\w\s]/', '', $text); // Remove punctuation
+    $text = str_replace("’", "'", $text); // Fix curly apostrophes
+    $text = preg_replace('/[^\w\s\']/', '', $text); // Remove punctuation except apostrophes
 
     // List of common words to ignore (stop words)
-    $stop_words = ['what', 'how', 'where', 'about', 'to', 'is', 'a', 'an', 'the', 'can', 'i', 'you', 'know', 'want', 'need'];
+    $stop_words = [
+        'what', 'how', 'where', 'about', 'to', 'is', 'a', 'an', 'the', 'can', 'i', 'you', 
+        'know', 'want', 'need', 'please', 'tell', 'me', 'do', 'does', 'like'
+    ];
 
     // Split sentence into words
     $words = explode(" ", $text);
@@ -79,8 +182,6 @@ function chatbot_extract_keywords($text) {
     return $text;
 }
 
-
 // Register AJAX actions
 add_action('wp_ajax_chatbot_search_query', 'chatbot_search_query');
 add_action('wp_ajax_nopriv_chatbot_search_query', 'chatbot_search_query');
-
