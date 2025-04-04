@@ -25,9 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Predefined Responses
     const responses = {
-        "service": "Check our services here: <a href='https://teddingtontown.co.uk/estate-agents/' target='_blank'>Estate Agents</a>",
-        "contact": "You can contact us at: Daniel@TeddingtonTown.co.uk, 0981234567 or visit <a href='https://teddingtontown.co.uk/advertise-with-us/' target='_blank'>this page</a>.",
-        "advertise": "For advertising, contact Daniel@TeddingtonTown.co.uk or visit <a href='https://teddingtontown.co.uk/advertise-with-us/' target='_blank'>this page</a>."
+        "service": "Check our services here: <a href='/estate-agents/' target='_blank'>Estate Agents</a>",
+        "contact": "You can contact us at: Daniel@TeddingtonTown.co.uk, 0981234567 or visit <a href='/advertise-with-us/' target='_blank'>this page</a>.",
+        "advertise": "For advertising, contact Daniel@TeddingtonTown.co.uk or visit <a href='/advertise-with-us/' target='_blank'>this page</a>."
     };
 
     // Toggle Chatbot Visibility
