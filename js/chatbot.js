@@ -32,14 +32,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Toggle Chatbot Visibility
     chatbotToggle.addEventListener("click", function () {
-        chatContainer.style.display = chatContainer.style.display === "none" ? "block" : "none";
+		const isHidden = chatContainer.style.display === "none";
 
-        // Start welcome messages if not already started
-        if (!botStarted) {
-            botStarted = true;
-            startWelcomeSequence();
-        }
-    });
+		chatContainer.style.display = isHidden ? "block" : "none";
+		chatbotToggle.textContent = isHidden ? "Close" : "I am Bot";
+
+		if (isHidden && !botStarted) {
+			botStarted = true;
+			startWelcomeSequence();
+		}
+	});
 
 	
 	function showTypingIndicator(callback) {
